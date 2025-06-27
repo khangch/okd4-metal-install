@@ -24,7 +24,7 @@ okd4-compute-2.lab.okd.local.        IN      A      192.168.22.212
 
 ; OpenShift Internal - Load balancer
 api.lab.okd.local.        IN    A    192.168.22.1
-api-int.lab.okd.local    IN    A    192.168.22.1
+api-int.lab.okd.local.    IN    A    192.168.22.1
 *.apps.lab.okd.local.     IN    A    192.168.22.1
 
 ; ETCD Cluster
@@ -33,7 +33,7 @@ etcd-1.lab.okd.local.    IN    A     192.168.22.202
 etcd-2.lab.okd.local.    IN    A     192.168.22.203
 
 ; OpenShift Internal SRV records (cluster name = lab)
-_etcd-server-ssl._tcp.lab.okd.local    86400     IN    SRV     0    10    2380    etcd-0.lab
+_etcd-server-ssl._tcp.lab.okd.local.    86400     IN    SRV     0    10    2380    etcd-0.lab
 _etcd-server-ssl._tcp.lab.okd.local.    86400     IN    SRV     0    10    2380    etcd-1.lab
 _etcd-server-ssl._tcp.lab.okd.local.    86400     IN    SRV     0    10    2380    etcd-2.lab
 
