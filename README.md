@@ -22,107 +22,98 @@
 
 ## Download Software
 
-1. Download [CentOS 8 x86_64 image](https://www.centos.org/centos-linux/)
-1. Login to [RedHat OpenShift Cluster Manager](https://cloud.redhat.com/openshift)
-1. Select 'Create Cluster' from the 'Clusters' navigation menu
-1. Select 'RedHat OpenShift Container Platform'
-1. Select 'Run on Bare Metal'
-1. Download the following files:
-
-   - Openshift Installer for Linux
-   - Pull secret
-   - Command Line Interface for Linux and your workstations OS
-   - Red Hat Enterprise Linux CoreOS (RHCOS)
-     - rhcos-X.X.X-x86_64-metal.x86_64.raw.gz
-     - rhcos-X.X.X-x86_64-installer.x86_64.iso (or rhcos-X.X.X-x86_64-live.x86_64.iso for newer versions)
+1. Download [CentOS 9 Stream x86_64 image](https://www.centos.org/centos-linux/)
+1. Download the following files: FCOS ISO file (https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/36.20220716.3.1/x86_64/fedora-coreos-36.20220716.3.1-live.x86_64.iso)
 
 ## Prepare the 'Bare Metal' environment
 
 > VMware ESXi used in this guide
 
-1. Copy the CentOS 8 iso to an ESXi datastore
-1. Create a new Port Group called 'OCP' under Networking
-    - (In case of VirtualBox choose "Internal Network" when creating each VM and give it the same name. ocp for instance)
+1. Copy the CentOS 9 Stream iso to an ESXi datastore
+1. Create a new Port Group called 'OKD' under Networking
+    - (In case of VirtualBox choose "Internal Network" when creating each VM and give it the same name. okd for instance)
     - (In case of ProxMox you may use the same network bridge and choose a specific VLAN tag. 50 for instance) 
 1. Create 3 Control Plane virtual machines with minimum settings:
-   - Name: ocp-cp-# (Example ocp-cp-1)
+   - Name: okd4-control-plane-# (Example okd4-control-plane-1)
    - 4vcpu
-   - 8GB RAM
-   - 50GB HDD
-   - NIC connected to the OCP network
+   - 16GB RAM
+   - 120GB HDD
+   - NIC connected to the OKD network
    - Load the rhcos-X.X.X-x86_64-installer.x86_64.iso image into the CD/DVD drive
 1. Create 2 Worker virtual machines (or more if you want) with minimum settings:
-   - Name: ocp-w-# (Example ocp-w-1)
+   - Name: okd4-compute-# (Example okd4-compute-1)
    - 4vcpu
-   - 8GB RAM
-   - 50GB HDD
+   - 16GB RAM
+   - 120GB HDD
    - NIC connected to the OCP network
    - Load the rhcos-X.X.X-x86_64-installer.x86_64.iso image into the CD/DVD drive
 1. Create a Bootstrap virtual machine (this vm will be deleted once installation completes) with minimum settings:
-   - Name: ocp-boostrap
+   - Name: okd4-boostrap
    - 4vcpu
-   - 8GB RAM
-   - 50GB HDD
+   - 16GB RAM
+   - 120GB HDD
    - NIC connected to the OCP network
    - Load the rhcos-X.X.X-x86_64-installer.x86_64.iso image into the CD/DVD drive
 1. Create a Services virtual machine with minimum settings:
-   - Name: ocp-svc
+   - Name: okd4-service
    - 4vcpu
    - 4GB RAM
-   - 120GB HDD
+   - 100GB HDD
    - NIC1 connected to the VM Network (LAN)
-   - NIC2 connected to the OCP network
-   - Load the CentOS_8.iso image into the CD/DVD drive
+   - NIC2 connected to the OKD network
+   - Load the CentOS_9_Stream.iso image into the CD/DVD drive
 1. Boot all virtual machines so they each are assigned a MAC address
-1. Shut down all virtual machines except for 'ocp-svc'
+1. Shut down all virtual machines except for 'okd4-service'
 1. Use the VMware ESXi dashboard to record the MAC address of each vm, these will be used later to set static IPs
 
 ## Configure Environmental Services
 
-1. Install CentOS8 on the ocp-svc host
+1. Install CentOS9 Stream on the ocp-svc host
 
    - Remove the home dir partition and assign all free storage to '/'
    - Optionally you can install the 'Guest Tools' package to have monitoring and reporting in the VMware ESXi dashboard
-   - Enable the LAN NIC only to obtain a DHCP address from the LAN network and make note of the IP address (ocp-svc_IP_address) assigned to the vm
+   - Enable the LAN NIC only to obtain a DHCP address from the LAN network and make note of the IP address (okd4-service_IP_address) assigned to the vm
 
-1. Boot the ocp-svc VM
+1. Boot the okd4-service VM
 
-1. Move the files downloaded from the RedHat Cluster Manager site to the ocp-svc node
+1.  download files from the OKD project git site to the okd4-service node
 
    ```bash
-   scp ~/Downloads/openshift-install-linux.tar.gz ~/Downloads/openshift-client-linux.tar.gz ~/Downloads/rhcos-metal.x86_64.raw.gz root@{ocp-svc_IP_address}:/root/
+   wget https://github.com/okd-project/okd/releases/download/4.11.0-0.okd-2023-01-14-152430/openshift-install-linux-4.11.0-0.okd-2023-01-14-152430.tar.gz
+   wget https://github.com/okd-project/okd/releases/download/4.11.0-0.okd-2023-01-14-152430/openshift-client-linux-4.11.0-0.okd-2023-01-14-152430.tar.gz
    ```
 
-1. SSH to the ocp-svc vm
+
+1. Extract Client and install tools and copy them to `/usr/local/bin`
 
    ```bash
-   ssh root@{ocp-svc_IP_address}
-   ```
-
-1. Extract Client tools and copy them to `/usr/local/bin`
-
-   ```bash
-   tar xvf openshift-client-linux.tar.gz
-   mv oc kubectl /usr/local/bin
+   tar -zxvf openshift-client-linux-4.11.0-0.okd-2023-01-14-152430.tar.gz
+   tar -zxvf openshift-install-linux-4.11.0-0.okd-2023-01-14-152430.tar.gz
+   mv kubectl oc openshift-install /usr/local/bin/
    ```
 
 1. Confirm Client Tools are working
 
    ```bash
-   kubectl version
    oc version
+   openshift-install version
    ```
+1. Use Openshift-install Tool to get the correct FCOS version and download link:
 
-1. Extract the OpenShift Installer
-
+  ```bash
+  openshift-install coreos print-stream-json
+  ```
+1. Download the FCOS ISO and upload to ESXI datastore to load the other VM disk
+2. Download the FCOS raw.xz and raw.xz.sig file to okd4-service VM :
    ```bash
-   tar xvf openshift-install-linux.tar.gz
-   ```
+  wget https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/36.20220716.3.1/x86_64/fedora-coreos-36.20220716.3.1-metal.x86_64.raw.xz
+  wget https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/36.20220716.3.1/x86_64/fedora-coreos-36.20220716.3.1-metal.x86_64.raw.xz.sig
+  ```
 
 1. Update CentOS so we get the latest packages for each of the services we are about to install
 
    ```bash
-   dnf update
+   dnf update -y
    ```
 
 1. Install Git
@@ -131,10 +122,10 @@
    dnf install git -y
    ```
 
-1. Download [config files](https://github.com/ryanhay/ocp4-metal-install) for each of the services
+1. Download [config files](https://github.com/khangch/okd4-metal-install) for each of the services
 
    ```bash
-   git clone https://github.com/ryanhay/ocp4-metal-install
+   git clone https://github.com/khangch/okd4-metal-install
    ```
 
 1. OPTIONAL: Create a file '~/.vimrc' and paste the following (this helps with editing in vim, particularly yaml files):
@@ -153,11 +144,11 @@
    export KUBE_EDITOR="vim"
    ```
 
-1. Set a Static IP for OCP network interface `nmtui-edit ens224` or edit `/etc/sysconfig/network-scripts/ifcfg-ens224`
+1. Set a Static IP for OKD network interface `nmtui-edit ens224` or edit `/etc/sysconfig/network-scripts/ifcfg-ens224`
 
    - **Address**: 192.168.22.1
    - **DNS Server**: 127.0.0.1
-   - **Search domain**: ocp.lan
+   - **Search domain**: okd.local
    - Never use this network for default route
    - Automatically connect
 
@@ -217,8 +208,8 @@
    Apply configuration
 
    ```bash
-   \cp ~/ocp4-metal-install/dns/named.conf /etc/named.conf
-   cp -R ~/ocp4-metal-install/dns/zones /etc/named/
+   \cp ~/okd4-metal-install/dns/named.conf /etc/named.conf
+   cp -R ~/okd4-metal-install/dns/zones /etc/named/
    ```
 
    Configure the firewall for DNS
@@ -238,7 +229,7 @@
    systemctl status named
    ```
 
-   > At the moment DNS will still be pointing to the LAN DNS server. You can see this by testing with `dig ocp.lan`.
+   > At the moment DNS will still be pointing to the LAN DNS server. You can see this by testing with `dig okd.local`.
 
    Change the LAN nic (ens192) to use 127.0.0.1 for DNS AND ensure `Ignore automatically Obtained DNS parameters` is ticked
 
@@ -255,8 +246,8 @@
    Confirm dig now sees the correct DNS results by using the DNS Server running locally
 
    ```bash
-   dig ocp.lan
-   # The following should return the answer ocp-bootstrap.lab.ocp.lan from the local server
+   dig okd.local
+   # The following should return the answer ocp-bootstrap.lab.okd.local from the local server
    dig -x 192.168.22.200
    ```
 
@@ -271,7 +262,7 @@
    Edit dhcpd.conf from the cloned git repo to have the correct mac address for each host and copy the conf file to the correct location for the DHCP service to use
 
    ```bash
-   \cp ~/ocp4-metal-install/dhcpd.conf /etc/dhcp/dhcpd.conf
+   \cp ~/okd4-metal-install/dhcpd.conf /etc/dhcp/dhcpd.conf
    ```
 
    Configure the Firewall
@@ -335,12 +326,12 @@
    Copy HAProxy config
 
    ```bash
-   \cp ~/ocp4-metal-install/haproxy.cfg /etc/haproxy/haproxy.cfg
+   \cp ~/okd4-metal-install/haproxy.cfg /etc/haproxy/haproxy.cfg
    ```
 
    Configure the Firewall
 
-   > Note: Opening port 9000 in the external zone allows access to HAProxy stats that are useful for monitoring and troubleshooting. The UI can be accessed at: `http://{ocp-svc_IP_address}:9000/stats`
+   > Note: Opening port 9000 in the external zone allows access to HAProxy stats that are useful for monitoring and troubleshooting. The UI can be accessed at: `http://{okd4-service_IP_address}:9000/stats`
 
    ```bash
    firewall-cmd --add-port=6443/tcp --zone=internal --permanent # kube-api-server on control plane nodes
@@ -415,13 +406,13 @@
 1. Create an install directory
 
    ```bash
-   mkdir ~/ocp-install
+   mkdir ~/okd4-install
    ```
 
 1. Copy the install-config.yaml included in the clones repository to the install directory
 
    ```bash
-   cp ~/ocp4-metal-install/install-config.yaml ~/ocp-install
+   cp ~/okd4-metal-install/install-config.yaml ~/okd4-install
    ```
 
 1. Update the install-config.yaml with your own pull-secret and ssh key.
@@ -430,85 +421,88 @@
    - Line 24 should contain the contents of your '~/.ssh/id_rsa.pub'
 
    ```bash
-   vim ~/ocp-install/install-config.yaml
+   vim ~/okd4-install/install-config.yaml
    ```
 
 1. Generate Kubernetes manifest files
 
    ```bash
-   ~/openshift-install create manifests --dir ~/ocp-install
+   openshift-install create manifests --dir ~/okd4-install
    ```
 
    > A warning is shown about making the control plane nodes schedulable. It is up to you if you want to run workloads on the Control Plane nodes. If you dont want to you can disable this with:
-   > `sed -i 's/mastersSchedulable: true/mastersSchedulable: false/' ~/ocp-install/manifests/cluster-scheduler-02-config.yml`.
+   > `sed -i 's/mastersSchedulable: true/mastersSchedulable: false/' ~/okd4-install/manifests/cluster-scheduler-02-config.yml`.
    > Make any other custom changes you like to the core Kubernetes manifest files.
 
    Generate the Ignition config and Kubernetes auth files
 
    ```bash
-   ~/openshift-install create ignition-configs --dir ~/ocp-install/
+   openshift-install create ignition-configs --dir ~/okd4-install/
    ```
 
 1. Create a hosting directory to serve the configuration files for the OpenShift booting process
 
    ```bash
-   mkdir /var/www/html/ocp4
+   mkdir /var/www/html/okd4
    ```
 
 1. Copy all generated install files to the new web server directory
 
    ```bash
-   cp -R ~/ocp-install/* /var/www/html/ocp4
+   cp -R ~/okd4-install/* /var/www/html/okd4
    ```
 
 1. Move the Core OS image to the web server directory (later you need to type this path multiple times so it is a good idea to shorten the name)
 
    ```bash
-   mv ~/rhcos-X.X.X-x86_64-metal.x86_64.raw.gz /var/www/html/ocp4/rhcos
+   cd /var/www/html/okd4/
+   mv ~/fedora-coreos-36.20220716.3.1-live.x86_64.raw.xz /var/www/html/okd4
+   mv ~/fedora-coreos-36.20220716.3.1-live.x86_64.raw.xz.sig /var/www/html/okd4
+   mv fedora-coreos-36.20220716.3.1-live.x86_64.raw.xz fcos.raw.xz
+   mv fedora-coreos-36.20220716.3.1-live.x86_64.raw.xz.sig fcos.raw.xz.sig
    ```
 
 1. Change ownership and permissions of the web server directory
 
    ```bash
-   chcon -R -t httpd_sys_content_t /var/www/html/ocp4/
-   chown -R apache: /var/www/html/ocp4/
-   chmod 755 /var/www/html/ocp4/
+   chcon -R -t httpd_sys_content_t /var/www/html/okd4/
+   chown -R apache: /var/www/html/okd4/
+   chmod 755 /var/www/html/okd4/
    ```
 
 1. Confirm you can see all files added to the `/var/www/html/ocp4/` dir through Apache
 
    ```bash
-   curl localhost:8080/ocp4/
+   curl localhost:8080/okd4/
    ```
 
 ## Deploy OpenShift
 
-1. Power on the ocp-bootstrap host and ocp-cp-\# hosts and select 'Tab' to enter boot configuration. Enter the following configuration:
+1. Power on the ocp-bootstrap host and okd4-control-plane-\# hosts and select 'Tab' to enter boot configuration. Enter the following configuration:
 
    ```bash
-   # Bootstrap Node - ocp-bootstrap
-   coreos.inst.install_dev=sda coreos.inst.image_url=http://192.168.22.1:8080/ocp4/rhcos coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.1:8080/ocp4/bootstrap.ign
+   # Bootstrap Node - okd4-bootstrap
+   coreos.inst.install_dev=/dev/sda coreos.inst.image_url=http://192.168.22.1:8080/okd4/fcos.raw.xz coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.1:8080/okd4/bootstrap.ign
    
    # Or if you waited for it boot, use the following command then just reboot after it finishes and make sure you remove the attached .iso
-   sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/ocp4/rhcos -I http://192.168.22.1:8080/ocp4/bootstrap.ign --insecure --insecure-ignition
+   sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/okd4/fcos.raw.xz -I http://192.168.22.1:8080/okd4/bootstrap.ign --insecure --insecure-ignition
    ```
 
    ```bash
-   # Each of the Control Plane Nodes - ocp-cp-\#
-   coreos.inst.install_dev=sda coreos.inst.image_url=http://192.168.22.1:8080/ocp4/rhcos coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.1:8080/ocp4/master.ign
+   # Each of the Control Plane Nodes - okd4-control-plane-\#
+   coreos.inst.install_dev=/dev/sda coreos.inst.image_url=http://192.168.22.1:8080/okd4/fcos.raw.xz coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.1:8080/okd4/master.ign
    
    # Or if you waited for it boot, use the following command then just reboot after it finishes and make sure you remove the attached .iso
-   sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/ocp4/rhcos -I http://192.168.22.1:8080/ocp4/master.ign --insecure --insecure-ignition
-   ```
+  sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/okd4/fcos.raw.xz -I http://192.168.22.1:8080/okd4/master.ign --insecure --insecure-ignition   ```
 
-1. Power on the ocp-w-\# hosts and select 'Tab' to enter boot configuration. Enter the following configuration:
+1. Power on the okd4-compute-\# hosts and select 'Tab' to enter boot configuration. Enter the following configuration:
 
    ```bash
-   # Each of the Worker Nodes - ocp-w-\#
-   coreos.inst.install_dev=sda coreos.inst.image_url=http://192.168.22.1:8080/ocp4/rhcos coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.1:8080/ocp4/worker.ign
+   # Each of the Worker Nodes - okd4-compute-\#
+   coreos.inst.install_dev=/dev/sda coreos.inst.image_url=http://192.168.22.1:8080/okd4/fcos.raw.xz coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.1:8080/okd4/worker.ign
    
    # Or if you waited for it boot, use the following command then just reboot after it finishes and make sure you remove the attached .iso
-   sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/ocp4/rhcos -I http://192.168.22.1:8080/ocp4/worker.ign --insecure --insecure-ignition
+   sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/okd4/fcos.raw.xz -I http://192.168.22.1:8080/okd4/worker.ign --insecure --insecure-ignition
    ```
 
 ## Monitor the Bootstrap Process
@@ -516,23 +510,23 @@
 1. You can monitor the bootstrap process from the ocp-svc host at different log levels (debug, error, info)
 
    ```bash
-   ~/openshift-install --dir ~/ocp-install wait-for bootstrap-complete --log-level=debug
+   openshift-install --dir ~/okd4-install wait-for bootstrap-complete --log-level=debug
    ```
 
 1. Once bootstrapping is complete the ocp-boostrap node [can be removed](#remove-the-bootstrap-node)
 
 ## Remove the Bootstrap Node
 
-1. Remove all references to the `ocp-bootstrap` host from the `/etc/haproxy/haproxy.cfg` file
+1. Remove all references to the `okd4-bootstrap` host from the `/etc/haproxy/haproxy.cfg` file
 
    ```bash
    # Two entries
    vim /etc/haproxy/haproxy.cfg
-   # Restart HAProxy - If you are still watching HAProxy stats console you will see that the ocp-boostrap host has been removed from the backends.
+   # Restart HAProxy - If you are still watching HAProxy stats console you will see that the okd4-boostrap host has been removed from the backends.
    systemctl reload haproxy
    ```
 
-1. The ocp-bootstrap host can now be safely shutdown and deleted from the VMware ESXi Console, the host is no longer required
+1. The okd4-bootstrap host can now be safely shutdown and deleted from the VMware ESXi Console, the host is no longer required
 
 ## Wait for installation to complete
 
