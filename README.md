@@ -105,7 +105,8 @@
   ```
 1. Download the FCOS ISO and upload to ESXI datastore to load the other VM disk
 2. Download the FCOS raw.xz and raw.xz.sig file to okd4-service VM :
-   ```bash
+
+  ```bash
   wget https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/36.20220716.3.1/x86_64/fedora-coreos-36.20220716.3.1-metal.x86_64.raw.xz
   wget https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/36.20220716.3.1/x86_64/fedora-coreos-36.20220716.3.1-metal.x86_64.raw.xz.sig
   ```
