@@ -495,6 +495,7 @@
    
    # Or if you waited for it boot, use the following command then just reboot after it finishes and make sure you remove the attached .iso
   sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/okd4/fcos.raw.xz -I http://192.168.22.1:8080/okd4/master.ign --insecure --insecure-ignition   ```
+   ```
 
 1. Power on the okd4-compute-\# hosts and select 'Tab' to enter boot configuration. Enter the following configuration:
 
