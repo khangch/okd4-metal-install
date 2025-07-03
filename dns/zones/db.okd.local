@@ -8,7 +8,7 @@ $TTL    604800
 )
         IN      NS      okd4-services
 
-okd4-services.okd.local.          IN      A       192.168.22.1
+okd4-services.okd.local.          IN      A       192.168.22.2
 
 ; Temp Bootstrap Node
 okd4-bootstrap.lab.okd.local.        IN      A      192.168.22.200
@@ -23,9 +23,9 @@ okd4-compute-1.lab.okd.local.        IN      A      192.168.22.211
 okd4-compute-2.lab.okd.local.        IN      A      192.168.22.212
 
 ; OpenShift Internal - Load balancer
-api.lab.okd.local.        IN    A    192.168.22.1
-api-int.lab.okd.local.    IN    A    192.168.22.1
-*.apps.lab.okd.local.     IN    A    192.168.22.1
+api.lab.okd.local.        IN    A    192.168.22.2
+api-int.lab.okd.local.    IN    A    192.168.22.2
+*.apps.lab.okd.local.     IN    A    192.168.22.2
 
 ; ETCD Cluster
 etcd-0.lab.okd.local.    IN    A     192.168.22.201
@@ -37,5 +37,5 @@ _etcd-server-ssl._tcp.lab.okd.local.    86400     IN    SRV     0    10    2380 
 _etcd-server-ssl._tcp.lab.okd.local.    86400     IN    SRV     0    10    2380    etcd-1.lab
 _etcd-server-ssl._tcp.lab.okd.local.    86400     IN    SRV     0    10    2380    etcd-2.lab
 
-oauth-openshift.apps.lab.okd.local.     IN     A     192.168.22.1
-console-openshift-console.apps.lab.okd.local.     IN     A     192.168.22.1
+oauth-openshift.apps.lab.okd.local.     IN     A     192.168.22.2
+console-openshift-console.apps.lab.okd.local.     IN     A     192.168.22.2
