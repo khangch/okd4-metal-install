@@ -457,10 +457,10 @@
 
    ```bash
    cd /var/www/html/okd4/
-   mv ~/fedora-coreos-36.20220716.3.1-live.x86_64.raw.xz /var/www/html/okd4
-   mv ~/fedora-coreos-36.20220716.3.1-live.x86_64.raw.xz.sig /var/www/html/okd4
-   mv fedora-coreos-36.20220716.3.1-live.x86_64.raw.xz fcos.raw.xz
-   mv fedora-coreos-36.20220716.3.1-live.x86_64.raw.xz.sig fcos.raw.xz.sig
+   mv ~/fedora-coreos-36.20220716.3.1-metal.x86_64.raw.xz /var/www/html/okd4
+   mv ~/fedora-coreos-36.20220716.3.1-metal.x86_64.raw.xz.sig /var/www/html/okd4
+   mv fedora-coreos-36.20220716.3.1-metal.x86_64.raw.xz fcos.raw.xz
+   mv fedora-coreos-36.20220716.3.1-metal.x86_64.raw.xz.sig fcos.raw.xz.sig
    ```
 
 1. Change ownership and permissions of the web server directory
