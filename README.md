@@ -537,7 +537,7 @@
 1. Collect the OpenShift Console address and kubeadmin credentials from the output of the install-complete event
 
    ```bash
-   ~/openshift-install --dir ~/ocp-install wait-for install-complete
+   ~/openshift-install --dir ~/okd4-install wait-for install-complete
    ```
 
 1. Continue to join the worker nodes to the cluster in a new tab whilst waiting for the above command to complete
@@ -547,7 +547,7 @@
 1. Setup 'oc' and 'kubectl' clients on the ocp-svc machine
 
    ```bash
-   export KUBECONFIG=~/ocp-install/auth/kubeconfig
+   export KUBECONFIG=~/okd4-install/auth/kubeconfig
    # Test auth by viewing cluster nodes
    oc get nodes
    ```
@@ -603,7 +603,7 @@
 1. Create the persistent volume for the 'image-registry-storage' pvc to bind to
 
    ```bash
-   oc create -f ~/ocp4-metal-install/manifest/registry-pv.yaml
+   oc create -f ~/okd4-metal-install/manifest/registry-pv.yaml
    ```
 
 1. After a short wait the 'image-registry-storage' pvc should now be bound
@@ -619,7 +619,7 @@
    > This will create a user 'admin' with the password 'password'. To set a different username and password substitue the htpasswd key in the '~/ocp4-metal-install/manifest/oauth-htpasswd.yaml' file with the output of `htpasswd -n -B -b <username> <password>`
 
    ```bash
-   oc apply -f ~/ocp4-metal-install/manifest/oauth-htpasswd.yaml
+   oc apply -f ~/okd4-metal-install/manifest/oauth-htpasswd.yaml
    ```
 
 1. Assign the new user (admin) admin permissions
@@ -639,27 +639,27 @@
 1. Append the following to your local workstations `/etc/hosts` file:
 
    > From your local workstation
-   > If you do not want to add an entry for each new service made available on OpenShift you can configure the ocp-svc DNS server to serve externally and create a wildcard entry for \*.apps.lab.ocp.lan
+   > If you do not want to add an entry for each new service made available on OpenShift you can configure the okd4-service DNS server to serve externally and create a wildcard entry for \*.apps.lab.okd.local
 
    ```bash
    # Open the hosts file
    sudo vi /etc/hosts
 
    # Append the following entries:
-   192.168.0.96 ocp-svc api.lab.ocp.lan console-openshift-console.apps.lab.ocp.lan oauth-openshift.apps.lab.ocp.lan downloads-openshift-console.apps.lab.ocp.lan alertmanager-main-openshift-monitoring.apps.lab.ocp.lan grafana-openshift-monitoring.apps.lab.ocp.lan prometheus-k8s-openshift-monitoring.apps.lab.ocp.lan thanos-querier-openshift-monitoring.apps.lab.ocp.lan
+   192.168.0.96 okd4-service api.lab.okd.local console-openshift-console.apps.lab.okd.local oauth-openshift.apps.lab.okd.local downloads-openshift-console.apps.lab.okd.local alertmanager-main-openshift-monitoring.apps.lab.okd.local grafana-openshift-monitoring.apps.lab.okd.local prometheus-k8s-openshift-monitoring.apps.lab.okd.local thanos-querier-openshift-monitoring.apps.lab.okd.local
    ```
 
-1. Navigate to the [OpenShift Console URL](https://console-openshift-console.apps.lab.ocp.lan) and log in as the 'admin' user
+1. Navigate to the [OpenShift Console URL](https://console-openshift-console.apps.lab.okd.local) and log in as the 'admin' user
 
    > You will get self signed certificate warnings that you can ignore
-   > If you need to login as kubeadmin and need to the password again you can retrieve it with: `cat ~/ocp-install/auth/kubeadmin-password`
+   > If you need to login as kubeadmin and need to the password again you can retrieve it with: `cat ~/okd4-install/auth/kubeadmin-password`
 
 ## Troubleshooting
 
-1. You can collect logs from all cluster hosts by running the following command from the 'ocp-svc' host:
+1. You can collect logs from all cluster hosts by running the following command from the 'okd4-service' host:
 
    ```bash
-   ./openshift-install gather bootstrap --dir ocp-install --bootstrap=192.168.22.200 --master=192.168.22.201 --master=192.168.22.202 --master=192.168.22.203
+   ./openshift-install gather bootstrap --dir okd4-install --bootstrap=192.168.22.200 --master=192.168.22.201 --master=192.168.22.202 --master=192.168.22.203
    ```
 
 1. Modify the role of the Control Plane Nodes
