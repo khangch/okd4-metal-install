@@ -483,28 +483,28 @@
 
    ```bash
    # Bootstrap Node - okd4-bootstrap
-   coreos.inst.install_dev=/dev/sda coreos.inst.image_url=http://192.168.22.1:8080/okd4/fcos.raw.xz coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.1:8080/okd4/bootstrap.ign
+   coreos.inst.install_dev=/dev/sda coreos.inst.image_url=http://192.168.22.2:8080/okd4/fcos.raw.xz coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.2:8080/okd4/bootstrap.ign
    
    # Or if you waited for it boot, use the following command then just reboot after it finishes and make sure you remove the attached .iso
-   sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/okd4/fcos.raw.xz -I http://192.168.22.1:8080/okd4/bootstrap.ign --insecure --insecure-ignition
+   sudo coreos-installer install /dev/sda -u http://192.168.22.2:8080/okd4/fcos.raw.xz -I http://192.168.22.2:8080/okd4/bootstrap.ign --insecure --insecure-ignition
    ```
 
    ```bash
    # Each of the Control Plane Nodes - okd4-control-plane-\#
-   coreos.inst.install_dev=/dev/sda coreos.inst.image_url=http://192.168.22.1:8080/okd4/fcos.raw.xz coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.1:8080/okd4/master.ign
+   coreos.inst.install_dev=/dev/sda coreos.inst.image_url=http://192.168.22.2:8080/okd4/fcos.raw.xz coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.2:8080/okd4/master.ign
    
    # Or if you waited for it boot, use the following command then just reboot after it finishes and make sure you remove the attached .iso
-    sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/okd4/fcos.raw.xz -I http://192.168.22.1:8080/okd4/master.ign --insecure --insecure-ignition
+    sudo coreos-installer install /dev/sda -u http://192.168.22.2:8080/okd4/fcos.raw.xz -I http://192.168.22.2:8080/okd4/master.ign --insecure --insecure-ignition
    ```
 
 1. Power on the okd4-compute-\# hosts and select 'Tab' to enter boot configuration. Enter the following configuration:
 
    ```bash
    # Each of the Worker Nodes - okd4-compute-\#
-   coreos.inst.install_dev=/dev/sda coreos.inst.image_url=http://192.168.22.1:8080/okd4/fcos.raw.xz coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.1:8080/okd4/worker.ign
+   coreos.inst.install_dev=/dev/sda coreos.inst.image_url=http://192.168.22.2:8080/okd4/fcos.raw.xz coreos.inst.insecure=yes coreos.inst.ignition_url=http://192.168.22.2:8080/okd4/worker.ign
    
    # Or if you waited for it boot, use the following command then just reboot after it finishes and make sure you remove the attached .iso
-   sudo coreos-installer install /dev/sda -u http://192.168.22.1:8080/okd4/fcos.raw.xz -I http://192.168.22.1:8080/okd4/worker.ign --insecure --insecure-ignition
+   sudo coreos-installer install /dev/sda -u http://192.168.22.2:8080/okd4/fcos.raw.xz -I http://192.168.22.2:8080/okd4/worker.ign --insecure --insecure-ignition
    ```
 
 ## Monitor the Bootstrap Process
